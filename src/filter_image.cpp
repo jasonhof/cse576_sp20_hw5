@@ -39,7 +39,7 @@ void l1_normalize(Image& im)
             }
         }
     }
-    cout << "divNum=" << divNum << endl;
+    //cout << "divNum=" << divNum << endl;
   // TODO: Normalize each channel
   //NOT_IMPLEMENTED();
   
@@ -377,11 +377,11 @@ Image make_gx_filter()
   im(2, 2) = .375;
   */
   //cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
-  cout << "made a gx filter:" << endl;
-  print_filter(im);
+  //cout << "made a gx filter:" << endl;
+  //print_filter(im);
   l1_normalize(im);
-  print_filter(im);
-  cout << "printed gx filter" << endl;
+  //print_filter(im);
+  //cout << "printed gx filter" << endl;
   //cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
   //NOT_IMPLEMENTED();
   
@@ -428,11 +428,11 @@ Image make_gy_filter()
   im(2, 2) = .375;
   */
   //cout<<im(0,0)<<","<<im(1,0)<<","<<im(1,1)<<","<<endl;
-  cout << "made a gy filter:" << endl;
-  print_filter(im);
+  //cout << "made a gy filter:" << endl;
+  //print_filter(im);
   l1_normalize(im);
-  print_filter(im);
-  cout << "printed gy filter" << endl;
+  //print_filter(im);
+  //cout << "printed gy filter" << endl;
   //cout<<im(0,0)<<","<<im(1,0)<<","<<im(1,1)<<","<<endl;
   //NOT_IMPLEMENTED();
   

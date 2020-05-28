@@ -101,6 +101,22 @@ void print_filter2(const Image& im)
     }
 }
 
+void print_filter3(const Image& im, float thresh)
+{
+    //cout << "filter:" << endl;
+    for (int wn = 0; wn < im.w; wn++)
+    {
+        for (int hn = 0; hn < im.h; hn++)
+        {
+            if (im(wn, hn, 0) > thresh) {
+                cout << "(" << wn << "," << hn << ")=" << im(wn, hn, 0) << ", "<<endl;
+            }
+        }
+        //cout << endl;
+    }
+    cout << "printed all pixels with values larger than thresh=" << thresh << endl;
+}
+
 // HW5 1.1b
 // Smooths an image using separable Gaussian filter.
 // const Image& im: image to smooth.
@@ -138,12 +154,12 @@ Image structure_matrix(const Image& im2, float sigma)
   assert((im2.c==1 || im2.c==3) && "only grayscale or rgb supported");
   Image im;
   // convert to grayscale if necessary
-  cout << "im2 channels = " <<im2.c << endl;
+  //cout << "im2 channels = " <<im2.c << endl;
   if(im2.c==1)im=im2;
   else im=rgb_to_grayscale(im2);
   
   Image S(im.w, im.h, 3);
-  cout << "S channels = " << S.c << endl;
+  //cout << "S channels = " << S.c << endl;
   // TODO: calculate structure matrix for im.
 
   // Convolve image with Sobel filter gx, then convolve with gy
@@ -175,7 +191,7 @@ Image structure_matrix(const Image& im2, float sigma)
   
   //NOT_IMPLEMENTED();
   //S = S3;
-  cout << "S channels = " << S.c << endl;
+  //cout << "S channels = " << S.c << endl;
   return S;
   }
 
@@ -190,8 +206,29 @@ Image cornerness_response(const Image& S, int method)
   // TODO: fill in R, "cornerness" for each pixel using the structure matrix.
   // We'll use formulation det(S) - alpha * trace(S)^2, alpha = .06.
   // E(S) = det(S) / trace(S)
-  
-  NOT_IMPLEMENTED();
+  float m11, m12, m21, m22;
+  for (int wn = 0; wn < S.w; wn++)
+  {
+      for (int hn = 0; hn < S.h; hn++)
+      {
+          m11 = S(wn, hn, 0);
+          m22 = S(wn, hn, 1);
+          m12 = S(wn, hn, 2);
+          m21 = m12;
+          // R    =    ( det(S) ) / ( tr(S) )
+          R(wn, hn, 0) = ( m11*m22 - m12*m21 ) / ( m11 + m22 );
+      }
+  }
+  /*
+  //print_filter3(S, .98);
+  //print_filter3(S, .99);
+  print_filter3(S, 2);
+  print_filter3(S,3);
+  print_filter3(S, 4);
+  print_filter3(S, 5);
+  */
+  //R = nms_image(R,5);
+  //NOT_IMPLEMENTED();
   
   return R;
   }
@@ -211,8 +248,26 @@ Image nms_image(const Image& im, int w)
   //     for neighbors within w:
   //         if neighbor response greater than pixel response:
   //             set response to be very low
-  
-  NOT_IMPLEMENTED();
+  float setVal = .000001;
+  for (int wn = 0; wn < im.w; wn++)
+  {
+      for (int hn = 0; hn < im.h; hn++)
+      {
+          for (int wn2 = wn - w; wn2 < wn + w; wn2++)
+          {
+              for (int hn2 = hn - w; hn2 < hn + w; hn2++)
+              {
+                  if (wn2 >= 0 && wn2 < im.w && hn2 >= 0 && hn2 < im.h)
+                  {
+                      if (r(wn, hn) < im(wn2, hn2)) {
+                          r(wn, hn) = setVal;
+                      }
+                  }
+              }
+          }
+      }
+  }
+  //NOT_IMPLEMENTED();
   
   return r;
   }
@@ -229,8 +284,19 @@ vector<Descriptor> detect_corners(const Image& im, const Image& nms, float thres
   vector<Descriptor> d;
   //TODO: count number of responses over threshold (corners)
   //TODO: and fill in vector<Descriptor> with descriptors of corners, use describe_index.
-  
-  NOT_IMPLEMENTED();
+  for (int wn = 0; wn < im.w; wn++)
+  {
+      for (int hn = 0; hn < im.h; hn++)
+      {
+          if (nms(wn, hn) > thresh)
+          {
+              // record it in the descriptor
+              d.push_back(describe_index(im, wn, hn, window));
+          }
+      }
+  }
+
+  //NOT_IMPLEMENTED();
   
   return d;
   }
