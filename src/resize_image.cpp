@@ -84,10 +84,11 @@ float Image::pixel_bilinear(float x, float y, int c) const
            A3*clamped_pixel(xMin,yMax,c)+
            A4*clamped_pixel(xMax,yMax,c);
   //NOT_IMPLEMENTED();
+  /*
   if(x==7.625 && y<0)
   {
     cout<<A1<<","<<A2<<","<<A3<<","<<A4<<endl;
-  }
+  }*/
   
   
   return retVal;
@@ -188,6 +189,7 @@ Image bilinear_resize(const Image& im, int w, int h)
   // failing at 32 0 0
   int checkVal = 32;
   float relVal = -.5+((float)checkVal+.5)*wMult;
+  /*
   cout<<"Debug bilinear_resize:"<<endl;
   cout<<"im.w="<<im.w<<", im.h="<<im.h<<", w="<<w<<", h="<<h<<endl;
   cout<<"checkVal="<<checkVal<<", relVal="<<relVal<<endl;
@@ -195,12 +197,13 @@ Image bilinear_resize(const Image& im, int w, int h)
   cout <<"im("<<checkVal-1<<",0,0)="<< im(checkVal-1,0,0)<<", im("<<checkVal<<",0,0)="<< im(checkVal,0,0)<<", im("<<checkVal+1<<",0,0)="<< im(checkVal+1,0,0)<<endl;
   cout <<"im("<<relVal-1<<",0,0)="<< im(relVal-1,0,0)<<", im("<<relVal<<",0,0)="<< im(relVal,0,0)<<", im("<<relVal+1<<",0,0)="<< im(relVal+1,0,0)<<endl;
   cout<<"ret("<<checkVal<<",0,0)="<<ret(checkVal,0,0)<<endl;
+  */
   int yNew = relVal;
   float xF, yF;
   modf(relVal,&xF);
   int xMin = xF;
   int xMax = xMin+1;
-  cout<<"xF="<<xF<<", xMin="<<xMin<<", xMax="<<xMax<<endl;
+  //cout<<"xF="<<xF<<", xMin="<<xMin<<", xMax="<<xMax<<endl;
   return ret;
   }
 

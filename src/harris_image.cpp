@@ -3,11 +3,13 @@
 #include <cstring>
 #include <cmath>
 #include <cassert>
+#include <iostream>
 
 #include "image.h"
 //#include "matrix.h"
 
 using namespace std;
+#define M_PI 3.14159265358979323846
 
 
 // Create a feature descriptor for an index in an image.
@@ -70,14 +72,34 @@ Image make_1d_gaussian(float sigma)
   {
   // TODO: make separable 1d Gaussian.
   
-  NOT_IMPLEMENTED();
-  
-  Image lin(1,1); // set to proper dimension
+  //NOT_IMPLEMENTED();
+  int len = sigma * 6;
+  if (len % 2 == 0) len += 1;
+  Image lin(len,1); // set to proper dimension
   lin.data[0]=1;
+  int mid = (len - 1 / 2);
+  for (int x = 0; x < len; x++)
+  {
+      int x2 = abs(mid - x);
+      lin(x, 0) = (1 / (2 * M_PI * sigma * sigma)) * exp(-(x2 * x2) / (2 * sigma * sigma));
+  }
   
   
   return lin;
   }
+
+void print_filter2(const Image& im)
+{
+    cout << "filter:" << endl;
+    for (int wn = 0; wn < im.w; wn++)
+    {
+        for (int hn = 0; hn < im.h; hn++)
+        {
+            cout << "(" << wn << "," << hn << ")=" << im(wn, hn, 0) << ", ";
+        }
+        cout << endl;
+    }
+}
 
 // HW5 1.1b
 // Smooths an image using separable Gaussian filter.
@@ -89,12 +111,19 @@ Image smooth_image(const Image& im, float sigma)
   // TODO: use two convolutions with 1d gaussian filter.
   // Hint: to make the filter from vertical to horizontal or vice versa
   // use "swap(filter.h,filter.w)"
-  
-  NOT_IMPLEMENTED();
-  
-  return im;
+    Image xg = make_1d_gaussian(sigma);
+    Image yg = xg;
+    swap(yg.h, yg.w);
+  //NOT_IMPLEMENTED();
+    print_filter2(xg);
+    print_filter2(yg);
+    cout << "got here1";
+    Image ret = convolve_image(im, xg, true);
+    cout << "2";
+    ret = convolve_image(im, yg, true);
+    cout << "3" << endl;;
+    return ret;
   }
-
 
 // HW5 1.1
 // Calculate the structure matrix of an image.
@@ -109,14 +138,44 @@ Image structure_matrix(const Image& im2, float sigma)
   assert((im2.c==1 || im2.c==3) && "only grayscale or rgb supported");
   Image im;
   // convert to grayscale if necessary
+  cout << "im2 channels = " <<im2.c << endl;
   if(im2.c==1)im=im2;
   else im=rgb_to_grayscale(im2);
   
   Image S(im.w, im.h, 3);
+  cout << "S channels = " << S.c << endl;
   // TODO: calculate structure matrix for im.
+
+  // Convolve image with Sobel filter gx, then convolve with gy
+  Image gx = make_gx_filter();
+  Image gy = make_gy_filter();
+  Image Ix = convolve_image(im, gx, true);
+  Image Iy = convolve_image(im, gy, true);
+  //cout << "S1 channels = " << S1.c << endl;
+  //cout << "S2 channels = " << S2.c << endl;
+  // Corresponding measures - set Ix^2 to ch1, Iy^2 to ch2, and IxIy to ch3
+  for (int wn = 0; wn < im.w; wn++)
+  {
+      for (int hn = 0; hn < im.h; hn++) 
+      {
+          S(wn, hn, 0) = Ix(wn, hn, 0) * Ix(wn, hn, 0);
+          S(wn, hn, 1) = Iy(wn, hn, 0) * Iy(wn, hn, 0);
+          S(wn, hn, 2) = Ix(wn, hn, 0) * Iy(wn, hn, 0);
+      }
+  }
+
+
+  // Convolve image with Gaussian
+  Image g = make_gaussian_filter(sigma);
+  S = convolve_image(S, g, true);
+
+  // Alternatively, do fast smoothing instead of Gaussian (not working rn)
+  //S = smooth_image(S, sigma);
+  //cout << "S channels = " << S.c << endl;
   
-  NOT_IMPLEMENTED();
-  
+  //NOT_IMPLEMENTED();
+  //S = S3;
+  cout << "S channels = " << S.c << endl;
   return S;
   }
 

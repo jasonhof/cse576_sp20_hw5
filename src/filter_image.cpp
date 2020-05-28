@@ -14,32 +14,32 @@ void l1_normalize(Image& im)
   {
     //int divNum = im.w * im.h;
     //int divNum = std.accumulate(im.begin(),im.end(),0);
-    int divNum = 0;
-    for (int wn=0;wn<im.w;wn++)
+    float divNum = 0;
+    for (int cn = 0; cn < im.c; cn++)
     {
-      for (int hn=0;hn<im.h;hn++)
-      {
-        for (int cn=0;cn<im.c;cn++)
+        for (int wn=0;wn<im.w;wn++)
         {
-          divNum += im(wn,hn,cn);;
+            for (int hn=0;hn<im.h;hn++)
+            {
+            divNum += im(wn,hn,cn);
+            }
         }
-      }
     }
     //int numChannels = im.c;
     if (divNum!=0)
     {
-      for (int wn=0;wn<im.w;wn++)
-      {
-        for (int hn=0;hn<im.h;hn++)
+        for (int cn = 0; cn < im.c; cn++)
         {
-          for (int cn=0;cn<im.c;cn++)
-          {
-            
-            im(wn,hn,cn) = im(wn,hn,cn) / divNum;
-          }
+            for (int wn=0;wn<im.w;wn++)
+            {
+                for (int hn=0;hn<im.h;hn++)
+                {
+                im(wn,hn,cn) = im(wn,hn,cn) / divNum;
+                }
+            }
         }
-      }
     }
+    cout << "divNum=" << divNum << endl;
   // TODO: Normalize each channel
   //NOT_IMPLEMENTED();
   
@@ -80,9 +80,9 @@ Image convolve_image(const Image& im, const Image& filter, bool preserve)
   Image ret(im); // Do I need to do a special thing to make a new image?
   //start at wn and hn = (filter.w-1/2)
   int ofs = (filter.w-1)/2; // Offset to start the convolution from current pixel
-  cout<<"convolve_image debug:"<<endl;
-  cout<<"ret.w="<<ret.w<<endl;
-  cout<<"ofs="<<ofs<<endl;
+  //cout<<"convolve_image debug:"<<endl;
+  //cout<<"ret.w="<<ret.w<<endl;
+  //cout<<"ofs="<<ofs<<endl;
   /*
   if (preserve)
   {
@@ -188,12 +188,12 @@ Image make_highpass_filter()
   im(2,1) = -1;
   im(1,2) = -1;
   im(1,1) = 4;
-  cout<<"make_highpass_filter: high pass filter made"<< endl;
-  print_filter(im);
-  cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
+  //cout<<"make_highpass_filter: high pass filter made"<< endl;
+  //print_filter(im);
+  //cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
   l1_normalize(im);
-  cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
-  print_filter(im);
+  //cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
+  //print_filter(im);
   //NOT_IMPLEMENTED();
   
   return im;
@@ -211,11 +211,11 @@ Image make_sharpen_filter()
   im(2,1) = -1;
   im(1,2) = -1;
   im(1,1) = 5;
-  print_filter(im);
-  cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
+  //print_filter(im);
+  //cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
   l1_normalize(im);
-  cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
-  print_filter(im);
+  //cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
+  //print_filter(im);
   //NOT_IMPLEMENTED();
   
   return im;
@@ -237,11 +237,11 @@ Image make_emboss_filter()
   im(2,0) = 0;
   im(2,1) = 1;
   im(2,2) = 2;
-  print_filter(im);
-  cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
+  //print_filter(im);
+  //cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
   l1_normalize(im);
-  cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
-  print_filter(im);
+  //cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
+  //print_filter(im);
   //NOT_IMPLEMENTED();
   
   return im;
@@ -343,6 +343,7 @@ Image make_gx_filter()
   {
   // TODO: Implement the filter
   Image im(3,3,1);
+  
   im(0,0) = -1;
   im(0,1) = -2;
   im(0,2) = -1;
@@ -352,9 +353,36 @@ Image make_gx_filter()
   im(2,0) = 1;
   im(2,1) = 2;
   im(2,2) = 1;
-  cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
+  
+  /*
+  im(0, 0) = -.125;
+  im(0, 1) = -.25;
+  im(0, 2) = -.125;
+  im(1, 0) = 0;
+  im(1, 1) = 0;
+  im(1, 2) = 0;
+  im(2, 0) = .125;
+  im(2, 1) = .25;
+  im(2, 2) = .125;
+  */
+  /*
+  im(0, 0) = -.125;
+  im(0, 1) = -.25;
+  im(0, 2) = -.125;
+  im(1, 0) = 0;
+  im(1, 1) = 0;
+  im(1, 2) = 0;
+  im(2, 0) = .375;
+  im(2, 1) = .75;
+  im(2, 2) = .375;
+  */
+  //cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
+  cout << "made a gx filter:" << endl;
+  print_filter(im);
   l1_normalize(im);
-  cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
+  print_filter(im);
+  cout << "printed gx filter" << endl;
+  //cout<<im(0,0)<<","<<im(0,1)<<","<<im(1,1)<<","<<endl;
   //NOT_IMPLEMENTED();
   
   return im;
@@ -366,6 +394,7 @@ Image make_gy_filter()
   {
   // TODO: Implement the filter
   Image im(3,3,1);
+  
   im(0,0) = -1;
   im(0,1) = 0;
   im(0,2) = 1;
@@ -375,9 +404,36 @@ Image make_gy_filter()
   im(2,0) = -1;
   im(2,1) = 0;
   im(2,2) = 1;
-  cout<<im(0,0)<<","<<im(1,0)<<","<<im(1,1)<<","<<endl;
+  
+  /*
+  im(0, 0) = -.125;
+  im(0, 1) = 0;
+  im(0, 2) = .125;
+  im(1, 0) = -.25;
+  im(1, 1) = 0;
+  im(1, 2) = .25;
+  im(2, 0) = -.125;
+  im(2, 1) = 0;
+  im(2, 2) = .125;
+  */
+  /*
+  im(0, 0) = -.125;
+  im(0, 1) = 0;
+  im(0, 2) = .375;
+  im(1, 0) = -.25;
+  im(1, 1) = 0;
+  im(1, 2) = .75;
+  im(2, 0) = -.125;
+  im(2, 1) = 0;
+  im(2, 2) = .375;
+  */
+  //cout<<im(0,0)<<","<<im(1,0)<<","<<im(1,1)<<","<<endl;
+  cout << "made a gy filter:" << endl;
+  print_filter(im);
   l1_normalize(im);
-  cout<<im(0,0)<<","<<im(1,0)<<","<<im(1,1)<<","<<endl;
+  print_filter(im);
+  cout << "printed gy filter" << endl;
+  //cout<<im(0,0)<<","<<im(1,0)<<","<<im(1,1)<<","<<endl;
   //NOT_IMPLEMENTED();
   
   return im;
@@ -392,49 +448,43 @@ void feature_normalize(Image& im)
   // TODO: Normalize the features for each channel
   //print_image(im);
   // find range and min
-  int range = 0;
-  int min = im(0,0,0);
-  int max = im(0,0,0);
-  int val = im(0,0,0);
-  for (int wn=0;wn<im.w;wn++)
-    {
-      for (int hn=0;hn<im.h;hn++)
-      {
-        for (int cn=0;cn<im.c;cn++)
-        {
-          val = im(wn,hn,cn);
-          if (val<min) { min = val;}
-          if (val>max) { max = val;}
-        }
-      }
-    }
-  range = max - min;
-  // if range is 0, set everything to 0
-  if (range == 0)
+  for (int cn = 0; cn < im.c; cn++)
   {
-    for (int wn=0;wn<im.w;wn++)
-    {
-      for (int hn=0;hn<im.h;hn++)
+      float range = 0;
+      float min = im(0, 0, cn);
+      float max = im(0, 0, cn);
+      float val = im(0, 0, cn);
+      for (int wn = 0; wn < im.w; wn++)
       {
-        for (int cn=0;cn<im.c;cn++)
-        {
-          im(wn,hn,cn) = 0;
-        }
+          for (int hn = 0; hn < im.h; hn++)
+          {
+              val = im(wn, hn, cn);
+              if (val < min) { min = val; }
+              if (val > max) { max = val; }
+          }
       }
-    }
-  }
-  else
-  {
-    for (int wn=0;wn<im.w;wn++)
-    {
-      for (int hn=0;hn<im.h;hn++)
+      range = max - min;
+      // if range is 0, set everything to 0
+      if (range == 0)
       {
-        for (int cn=0;cn<im.c;cn++)
-        {
-          im(wn,hn,cn) = (im(wn,hn,cn) - min) / range;
-        }
+          for (int wn = 0; wn < im.w; wn++)
+          {
+              for (int hn = 0; hn < im.h; hn++)
+              {
+                    im(wn, hn, cn) = 0;
+              }
+          }
       }
-    }
+      else
+      {
+          for (int wn = 0; wn < im.w; wn++)
+          {
+              for (int hn = 0; hn < im.h; hn++)
+              {
+                    im(wn, hn, cn) = (im(wn, hn, cn) - min) / range;
+              }
+          }
+      }
   }
   //print_image(im);
   
