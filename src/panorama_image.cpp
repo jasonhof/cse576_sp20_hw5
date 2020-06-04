@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cmath>
 #include <cassert>
+#include <iostream>
 
 #include "image.h"
 #include "matrix.h"
@@ -123,12 +124,18 @@ Image find_and_draw_matches(const Image& a, const Image& b, float sigma, float t
 float l1_distance(const vector<float>& a,const vector<float>& b)
   {
   assert(a.size()==b.size() && "Arrays must have same size\n");
-  
+  float total = 0.0;
+  float diff = 0.0;
   // TODO: return the correct number.
+  for (int i = 0; i < a.size(); i++)
+  {
+      diff = abs(a[i] - b[i]);
+      total = total + diff;
+  }
+  //cout << "l1_distance: total diff = " << total << endl;
+  //NOT_IMPLEMENTED();
   
-  NOT_IMPLEMENTED();
-  
-  return 0;
+  return total;
   }
 
 // HW5 2.2a
@@ -142,11 +149,22 @@ vector<int> match_descriptors_a2b(const vector<Descriptor>& a, const vector<Desc
     {
     int bind = -1; // <- find the best match (-1: no match)
     float best_distance=1e10f;  // <- best distance
-    
+    float cur_distance = 0;
     // TODO: find the best 'bind' descriptor in b that best matches a[j]
     // TODO: put your code here:
-    
-    NOT_IMPLEMENTED();
+    //cout << a[j] << endl;
+    for (int i = 0; i < (int)b.size(); i++)
+    {
+        cur_distance = l1_distance(a[j].data , b[i].data);
+        //cur_distance = 4;
+        if (cur_distance < best_distance)
+        {
+            best_distance = cur_distance;
+            bind = i;
+        }
+    }
+    ind.push_back(bind);
+    //NOT_IMPLEMENTED();
     }
   return ind;
   
@@ -166,8 +184,33 @@ vector<Match> match_descriptors(const vector<Descriptor>& a, const vector<Descri
   
   // TODO: use match_descriptors_a2b(a,b) and match_descriptors_a2b(b,a)
   // and populate `m` with good matches!
-  
-  NOT_IMPLEMENTED();
+  vector<int> ab = match_descriptors_a2b(a,b); // list of index matches in b for a's values
+  vector<int> ba = match_descriptors_a2b(b,a); // list of index matches in a for b's values
+  //cout << ab << endl;
+  for (int i = 0; i < a.size(); i++)
+  {
+      //cout << "i="<<i<<", ab[i]="<<ab[i]<<", ba[ab[i]]="<<ba[ab[i]]<<endl;
+      //cout << "i=" << i << " : ";
+      if (ba[ab[i]] == i)
+      {
+          //cout << "SUCCESS: Match found with i=" << i << ", ab[i]=" << ab[i] << " and ba[ab[i]]=" << ba[ab[i]] << endl;
+          // if the value of ba at the index that ab points to is i,
+          // then we have a mutual match!
+          float dist = l1_distance(a[i].data, b[ab[i]].data);
+          //Match mut;
+          //mut.a = &a[i];
+          //m.push_back(Match(&a[i], &b[ab[i]], dist));
+          Match mut = Match(&a[i], &b[ab[i]], dist);
+          m.push_back(mut);
+      }
+      else
+      {
+          //cout << "NOPE: Match not found with i=" << i << ", ab[i]=" << ab[i] << " and ba[ab[i]]=" << ba[ab[i]] << endl;
+          //cout << "Now comparing b to a: ba[ab[i]]=" << ba[ab[i]] << " and ab[ba[ab[i]]]=" << ab[ba[ab[i]]] << endl;
+          //int temp =
+      }
+  }
+  //NOT_IMPLEMENTED();
   
   return m;
   }
@@ -183,11 +226,12 @@ Point project_point(const Matrix& H, const Point& p)
   // TODO: project point p with homography H.
   // Remember that homogeneous coordinates are equivalent up to scalar.
   // Have to divide by.... something...
+  double x = ( (1+H(0,0))*p.x + H(0,1)*p.y + H(0,2) ) / ( H(2,0)*p.x + H(2,1)*p.y + 1 );
+  double y = ( H(1,0)*p.x + (1+H(1,1))*p.y + H(1,2) ) / ( H(2,0)*p.x + H(2,1)*p.y + 1 );
+  //NOT_IMPLEMENTED();
   
-  NOT_IMPLEMENTED();
   
-  
-  return Point(0,0);
+  return Point(x,y);
   }
 
 // HW5 3.2a
@@ -197,8 +241,9 @@ Point project_point(const Matrix& H, const Point& p)
 double point_distance(const Point& p, const Point& q)
   {
   // TODO: should be a quick one.
-  NOT_IMPLEMENTED();
-  return 0;
+    double diff = pow((p.x - q.x), 2) + pow((p.y - q.y), 2);
+  //NOT_IMPLEMENTED();
+  return diff;
   }
 
 // HW5 3.2b
@@ -213,8 +258,18 @@ vector<Match> model_inliers(const Matrix& H, const vector<Match>& m, float thres
   vector<Match> inliers;
   // TODO: fill inliers
   // i.e. distance(H*a.p, b.p) < thresh
+  float dist = 0;
+  for (int i = 0; i < m.size(); i++)
+  {
+      Point a = project_point(H, m[i].a->p);
+      dist = point_distance(a, m[i].b->p);
+      if (dist<thresh) 
+      { 
+          inliers.push_back(m[i]);
+      }
+  }
   
-  NOT_IMPLEMENTED();
+  //NOT_IMPLEMENTED();
   
   return inliers;
   }
@@ -227,8 +282,16 @@ void randomize_matches(vector<Match>& m)
   // TODO: implement Fisher-Yates to shuffle the array.
   // You might want to use the swap function like:
   // swap(m[0],m[1]) which swaps the first and second element
+    int len = m.size();
+    int rando = 0;
+    for (int i = len - 1; i > 0; i--)
+    {
+        rando = rand() % i + 1;
+        swap(m[rando], m[i]);
+
+    }
   
-  NOT_IMPLEMENTED();
+  //NOT_IMPLEMENTED();
   }
 
 // HW5 3.4
@@ -243,6 +306,7 @@ Matrix compute_homography_ba(const vector<Match>& matches)
   
   Matrix M(matches.size()*2,8);
   Matrix b(matches.size()*2);
+  //M.print();
   
   for(int i = 0; i < (int)matches.size(); ++i)
     {
@@ -252,8 +316,71 @@ Matrix compute_homography_ba(const vector<Match>& matches)
     double nx = matches[i].b->p.x;
     double ny = matches[i].b->p.y;
     // TODO: fill in the matrices M and b.
+    // each round of this loop is one match M[i] and b[i]
+
+    // M is all the matches
     
-    NOT_IMPLEMENTED();
+    M(i*2, 0) = nx;
+    M(i*2, 1) = ny;
+    M(i*2, 2) = 1;
+    M(i*2, 3) = 0;
+    M(i*2, 4) = 0;
+    M(i*2, 5) = 0;
+    M(i*2, 6) = -1*mx*nx;
+    M(i*2, 7) = -1*mx*ny;
+
+    M(i*2, 8) = 0;
+    M(i*2, 9) = 0;
+    M(i*2, 10) = 0;
+    M(i*2, 11) = nx;
+    M(i*2, 12) = ny;
+    M(i*2, 13) = 1;
+    M(i*2, 14) = -1*my * nx;
+    M(i*2, 15) = -1*my * ny;
+    
+    /*
+    M(0,i*2) = nx;
+    M(1,i*2) = ny;
+    M(2,i*2) = 1;
+    M(3,i*2) = 0;
+    M(4,i*2) = 0;
+    M(5,i*2) = 0;
+    M(6,i*2) = -1 * mx * nx;
+    M(7,i*2) = -1 * mx * ny;
+
+    M(8,i*2) = 0;
+    M(9,i*2) = 0;
+    M(10,i*2) = 0;
+    M(11,i*2) = nx;
+    M(12,i*2) = ny;
+    M(13,i*2) = 1;
+    M(14,i*2) = -1 * my * nx;
+    M(15,i*2) = -1 * my * ny;
+    */
+    
+    /*
+    M(i, 0, 0) = nx;
+    M(i, 0, 1) = ny;
+
+
+    M[i][0][0] = nx;
+    M[i][0][1] = ny;
+    M[i][0][2] = 1;
+    M[i][0][3] = 0;
+    M[i][0][4] = 0;
+    M[i][0][5] = 0;
+    */
+
+    // b is distance
+    b(i*2,0) = mx - nx;
+    b(i*2,1) = my - ny;
+
+    //M.print();
+    //b.print();
+    // Do I need to flip my indexes i and 0 above?  I guess, in C++, it will probably displace the same amount regardless?
+    // Could just consider doing b(i) and b(i+1), too- no? Prob not
+    // Also, I picked m as my x^ and y^, when m could very easily have been n- we'll see if that matters
+    //NOT_IMPLEMENTED();
     
     }
   
@@ -263,8 +390,19 @@ Matrix compute_homography_ba(const vector<Match>& matches)
   
   Matrix Hba(3, 3);
   // TODO: fill in the homography H based on the result in a.
-  
-  NOT_IMPLEMENTED();
+  // reverse what we did in the previous point calculation?
+  Hba(0, 0) = 1+a(0);
+  Hba(0, 1) = a(1);
+  Hba(0, 2) = a(2);
+  Hba(1, 0) = a(3);
+  Hba(1, 1) = 1+a(4);
+  Hba(1, 2) = a(5);
+  Hba(2, 0) = a(6);
+  Hba(2, 1) = a(7);
+  Hba(2, 2) = 1;
+
+  //Did I do this right?  Maybe remove the 1+'s
+  //NOT_IMPLEMENTED();
   
   return Hba;
   }
@@ -287,17 +425,36 @@ Matrix RANSAC(vector<Match> m, float thresh, int k, int cutoff)
   int best = 0;
   Matrix Hba = Matrix::translation_homography(256, 0);
   // TODO: fill in RANSAC algorithm.
+  vector<Match> comp(4);
+  Matrix test = Matrix::translation_homography(256, 0);
+  int score = 0;
+  vector<Match> inliers;
+  for (int i = 0; i < k; i++)
+  {
+      randomize_matches(m);
+      for (int j = 0; j < 4; j++) { comp[j] = m[j]; }
+      test = compute_homography_ba(comp);
+      inliers = model_inliers(test, m, thresh);
+      score = inliers.size();
+      if (score > thresh) return test;
+      if (score > best)
+      {
+          best = score;
+          Hba = test;  //this might be a problem with addressing (how to copy?)
+      }
+      
+  }
+
   // for k iterations:
   //     shuffle the matches
-  //     compute a homography with a few matches (how many??)
+  //     compute a homography with a few matches (how many?? 4, right?)
   //     if new homography is better than old (how can you tell?):
   //         compute updated homography using all inliers
   //         remember it and how good it is
   //         if it's better than the cutoff:
   //             return it immediately
   // if we get to the end return the best homography
-  
-  NOT_IMPLEMENTED();
+  //NOT_IMPLEMENTED();
   
   return Hba;
   }
@@ -344,6 +501,7 @@ Image combine_images(const Image& a, const Image& b, const Matrix& Hba, float ab
   Point c2 = project_point(Hinv, Point(b.w-1, 0));
   Point c3 = project_point(Hinv, Point(0, b.h-1));
   Point c4 = project_point(Hinv, Point(b.w-1, b.h-1));
+
   
   // Find top left and bottom right corners of image b warped into image a.
   Point topleft, botright;
@@ -376,7 +534,9 @@ Image combine_images(const Image& a, const Image& b, const Matrix& Hba, float ab
       for(int i = 0; i < a.w; ++i)
         {
         // TODO: fill in.
-        NOT_IMPLEMENTED();
+          c(i - dx, j - dy, k) = a(i, j, k); // may be -dx and -dy, but I'm not sure
+          //c(i - dx, j - dy, k) = 200;
+        //NOT_IMPLEMENTED();
         }
   
   // TODO: Blend in image b as well.
@@ -392,8 +552,40 @@ Image combine_images(const Image& a, const Image& b, const Matrix& Hba, float ab
   // The member 
   
   // TODO: Put your code here.
-  
-  NOT_IMPLEMENTED();
+  Point p=c1;
+  // c(wn, hn, cn) = b.pixel_bilinear(wi, hi, cn);  // will eventually call something like this
+  //for (int cn = 0; cn < b.c; ++cn) // can put this lower near the end
+    //{
+      for (int hn = 0; hn < b.h; ++hn)
+          for (int wn = 0; wn < b.w; ++wn)
+          {
+              // find out if b pixel lands in c
+              p = project_point(Hinv, Point(wn, hn));
+              if (p.x > 0 && p.x < c.w && p.y>0 && p.y < c.h)
+              {
+                  // if so, find out if there is already an a pixel there and place it or blend it (bilinear)
+                  if (c(p.x, p.y, 0) == 0)
+                  {
+                      for (int cn = 0; cn < c.c; ++cn)
+                      {
+                          c(p.x, p.y, cn) = b.pixel_bilinear(p.x, p.y, cn); // (I think I need to flip it) do I need to flip to project c onto b for bilinear to work?
+                          //c(p.x, p.y, cn) = b(p.x, p.y, cn);
+                      }
+                  }
+                  else  // if not, just place the b pixel there (bilinear
+                  {
+                      for (int cn = 0; cn < c.c; ++cn)
+                      {
+                          c(p.x, p.y, cn) = (1-ablendcoeff)*b.pixel_bilinear(p.x, p.y, cn) + ablendcoeff*c(p.x,p.y,cn); 
+                      }
+                      
+                  }
+              }
+              
+
+          }
+      //}
+  //NOT_IMPLEMENTED();
   
   
   // We trim the image so there are as few as possible black pixels.

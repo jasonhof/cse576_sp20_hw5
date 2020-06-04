@@ -15,7 +15,7 @@ Image rgb_to_grayscale(const Image& im)
   {
   assert(im.c == 3); // only accept RGB images
   Image gray(im.w,im.h,1); // create a new grayscale image (note: 1 channel)
-  cout << im.w << "," << im.h << "," << im.c << endl;
+  //cout << im.w << "," << im.h << "," << im.c << endl;
   // TODO: calculate the pixels of 'gray'
   for (int wn=0;wn<im.w;wn++)
   {
