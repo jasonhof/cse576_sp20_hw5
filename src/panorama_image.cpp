@@ -320,23 +320,31 @@ Matrix compute_homography_ba(const vector<Match>& matches)
 
     // M is all the matches
     
-    M(i*2, 0) = nx;
-    M(i*2, 1) = ny;
+    //M(i*2, 0) = nx;
+    //M(i*2, 1) = ny;
+    M(i * 2, 0) = mx;
+    M(i * 2, 1) = my;
     M(i*2, 2) = 1;
     M(i*2, 3) = 0;
     M(i*2, 4) = 0;
     M(i*2, 5) = 0;
-    M(i*2, 6) = -1*mx*nx;
-    M(i*2, 7) = -1*mx*ny;
+    //M(i*2, 6) = -1 * mx * nx;
+    //M(i*2, 7) = -1 * mx * ny;
+    M(i * 2, 6) = -1 * nx * mx;
+    M(i * 2, 7) = -1 * nx * my;
 
     M(i*2, 8) = 0;
     M(i*2, 9) = 0;
     M(i*2, 10) = 0;
-    M(i*2, 11) = nx;
-    M(i*2, 12) = ny;
+    //M(i*2, 11) = nx;
+    //M(i*2, 12) = ny;
+    M(i * 2, 11) = mx;
+    M(i * 2, 12) = my;
     M(i*2, 13) = 1;
-    M(i*2, 14) = -1*my * nx;
-    M(i*2, 15) = -1*my * ny;
+    //M(i*2, 14) = -1 * my * nx;
+    //M(i*2, 15) = -1 * my * ny;
+    M(i * 2, 14) = -1 * ny * mx;
+    M(i * 2, 15) = -1 * ny * my;
     
     /*
     M(0,i*2) = nx;
@@ -400,6 +408,9 @@ Matrix compute_homography_ba(const vector<Match>& matches)
   Hba(2, 0) = a(6);
   Hba(2, 1) = a(7);
   Hba(2, 2) = 1;
+
+  //a.print();
+  //Hba.print();
 
   //Did I do this right?  Maybe remove the 1+'s
   //NOT_IMPLEMENTED();
@@ -570,6 +581,7 @@ Image combine_images(const Image& a, const Image& b, const Matrix& Hba, float ab
                       {
                           c(p.x, p.y, cn) = b.pixel_bilinear(p.x, p.y, cn); // (I think I need to flip it) do I need to flip to project c onto b for bilinear to work?
                           //c(p.x, p.y, cn) = b(p.x, p.y, cn);
+                          //c(p.x, p.y, cn) = 50;
                       }
                   }
                   else  // if not, just place the b pixel there (bilinear
@@ -577,6 +589,7 @@ Image combine_images(const Image& a, const Image& b, const Matrix& Hba, float ab
                       for (int cn = 0; cn < c.c; ++cn)
                       {
                           c(p.x, p.y, cn) = (1-ablendcoeff)*b.pixel_bilinear(p.x, p.y, cn) + ablendcoeff*c(p.x,p.y,cn); 
+                          //c(p.x, p.y, cn) = 100;
                       }
                       
                   }
